@@ -124,6 +124,7 @@ bool EngineSettings::loadJson(const nlohmann::json& json)
 		return false;
 	}
 
+
 	if (!json.contains("UE_VERSION") ||
 		!json.contains("USE_FNAME_ENCRYPTION") ||
 		!json.contains("WITH_CASE_PRESERVING_NAME") ||
@@ -168,7 +169,7 @@ bool EngineSettings::loadJson(const nlohmann::json& json)
 
 	projectName = json["projectName"];
 
-	workingDir = json.value("workingDir", std::filesystem::path());
+	workingDir = std::filesystem::current_path() / projectName;
 	if (workingDir.empty())
 	{
 		windows::LogWindow::Log(windows::LogWindow::logLevels::LOGLEVEL_ERROR, "ENGINESETTINGS", "WorkingDir is missing!");

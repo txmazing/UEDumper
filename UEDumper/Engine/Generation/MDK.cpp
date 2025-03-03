@@ -208,8 +208,9 @@ void MDKGeneration::generatePackage(std::ofstream& stream, const EngineStructs::
 
 			for (const auto& func : struc->functions)
 			{
+				
 				stream << "\t// Function " << func.fullName << std::endl;
-				char funcBuf[1200];
+				char funcBuf[20100] = {};
 				std::string params = func.returnType.stringify() + " " + func.cppName.c_str() + "(";
 				for (auto param : func.params)
 				{
@@ -218,11 +219,17 @@ void MDKGeneration::generatePackage(std::ofstream& stream, const EngineStructs::
 						params += "*";
 					else if (std::get<2>(param) & EPropertyFlags::CPF_OutParm)
 						params += "&";
-					params += " " + std::get<1>(param) + ", ";
+					params += " " + generateValidVarName(std::get<1>(param)) + ", ";
 				}
 				if (func.params.size() > 0)
 					params = params.erase(params.size() - 2);
 				params += ");";
+
+				if (params.length() > 20000)
+				{
+					windows::LogWindow::Log(windows::LogWindow::logLevels::LOGLEVEL_WARNING, "MDK GEN", "function %s is too big!!!!!", func.fullName);
+					continue;
+				}
 
 
 
