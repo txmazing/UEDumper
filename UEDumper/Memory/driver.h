@@ -94,7 +94,11 @@ uint64_t _getBaseAddress(const wchar_t* processName, int& pid)
 
     if (!pid)
     {
-        baseAddress = mem.GetBaseDaddy(std::string(processName, processName + wcslen(processName)));
+        auto name = std::string(processName, processName + wcslen(processName));
+
+        baseAddress = mem.GetBaseDaddy(name);
+
+        pid = mem.GetPidFromName(name);
     }
 
 	// TODO: Support baseAddress by process ID again
