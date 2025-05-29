@@ -139,13 +139,4 @@ public:
 	{
 		write<T>(reinterpret_cast<void*>(address), data);
 	}
-
-	/**
-	 * \brief pattern scans the text section and returns 0 if unsuccessful
-	 * \param flag accepts OffsetFlags enums
-	 * \param pattern the pattern
-	 * \param mask the mask
-	 * \return the address
-	 */
-	static uint64_t patternScan(int flag, const char* pattern, const std::string& mask);
 };

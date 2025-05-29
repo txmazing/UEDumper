@@ -192,10 +192,6 @@ uint64_t EngineCore::getOffsetAddress(const Offset& offset)
 	if (!offset)
 		return 0;
 
-	if (offset.flag & OFFSET_SIGNATURE)
-	{
-		return Memory::patternScan(offset.flag, offset.sig, offset.mask);
-	}
 	if (offset.flag & OFFSET_ADDRESS)
 	{
 		return Memory::getBaseAddress() + offset.offset;

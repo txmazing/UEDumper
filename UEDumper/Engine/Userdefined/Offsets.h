@@ -35,11 +35,6 @@ enum OffsetFlags
 	OFFSET_LIVE_EDITOR = 1 << 0, //use this if the offset should be displayed in the live editor
 	OFFSET_DS = 1 << 1, //use this if the offset should be added to dumpspace when creating dumpspace files
 	OFFSET_ADDRESS = 1 << 2, //use this if the offset is at base + address
-	OFFSET_SIGNATURE = 1 << 3, //dont use directly
-	OFFSET_SIG_RVA = 1 << 4, //dont use directly
-	OFFSET_SIG_DIR = 1 << 5, //dont use directly
-	OFFSET_SINGNATURE_DIRECT = OFFSET_SIGNATURE | OFFSET_SIG_DIR, //use this if the signature start is the offset
-	OFFSET_SIGNATURE_FOLLOW = OFFSET_SIGNATURE | OFFSET_SIG_RVA, //use this if the offset is at the signature + rva
 
 };
 
@@ -49,44 +44,26 @@ struct Offset
 	std::string name = ""; //name of the Offset struct
 	uint64_t offset = 0; //if using flag OFFSET_ADDRESS, set the address here (dont write base +..., just write the offset)
 	//leave the rest empty if not using a sig
-	const char* sig = ""; //sig bytes in format \xAB\xCD\xEF\x00\x...
-	std::string mask = ""; //xxxxxxx??xxx??x? where x compares the byte and ? is a wildcard.
+	const char* sig = ""; //sig bytes in format 48 8D 0D ? ? ? ? E8 ? ? ? ? 48...
 
 	operator bool() const { return flag != -1; }
 
 	nlohmann::json toJson() const
 	{
 		nlohmann::json j;
-		j["flag"] = flag;
 		j["name"] = name;
 		j["offset"] = offset;
-		nlohmann::json jSig;
-		for (int i = 0; i < mask.length(); i++)
-		{
-			BYTE b = *(sig + i);
-			jSig.push_back(b);
-		}
-		j["sig"] = jSig;
-		j["mask"] = mask;
+		j["sig"] = sig;
 		return j;
 	}
 
-	static Offset fromJson(const nlohmann::json& json)
-	{
-		Offset o;
-		o.flag = json["flag"];
-		o.name = json["name"];
-		o.offset = json["offset"];
-		o.mask = json["mask"];
-		nlohmann::json jSig = json["sig"];
-		char* sig = new char[o.mask.length()];
-		int i = 0;
-		for (const BYTE byte : jSig)
-		{
-			sig[i++] = byte;
-		}
-		return o;
-	}
+    static Offset fromJson(const nlohmann::json& json)  
+    {  
+       Offset o;  
+       o.name = json["name"];  
+       o.offset = json["offset"];  
+       return o;  
+    }
 };
 
 //examples:
@@ -96,8 +73,6 @@ struct Offset
 //gobjects: 48 8B 05 ? ? ? ? 48 8B 0C C8 48 8D 04 D1 48 85 C0
 
 /// Example:
-///	Signatures need OFFSET_SIGNATURE_FOLLOW or OFFSET_SINGNATURE_DIRECT
-/// offsets.push_back({ OFFSET_SIGNATURE_FOLLOW | OFFSET_DS, "OFFSET_GNAMES", 0, "\x4C\x8B\x0D\x73\x3C\x94\x03", "xxxxxxx" });
 ///	Addresses need OFFSET_ADDRESS
 /// offsets.push_back({ OFFSET_ADDRESS | OFFSET_DS, "OFFSET_GOBJECTS", 0x4D01930 });
 ///	Use OFFSET_LIVE_EDITOR to display the address in the live editor
